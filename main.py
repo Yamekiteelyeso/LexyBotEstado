@@ -98,14 +98,15 @@ def run(config: dict[str, Any]) -> None:
             rpc.connect()
             rpc.update(**activity)
             print("Presencia activada en Discord.")
+            next_refresh = time.monotonic() + refresh_seconds
             while not STOP:
                 time.sleep(1)
                 if STOP:
                     break
-                # Una actualización por intervalo, sin exceder los límites normales.
-                now = int(time.time())
-                if now % refresh_seconds == 0:
+                # Actualiza en intervalos estables y conserva el contador original.
+                if time.monotonic() >= next_refresh:
                     rpc.update(**activity)
+                    next_refresh = time.monotonic() + refresh_seconds
         except Exception as exc:
             if not STOP:
                 print(f"No se pudo conectar o actualizar Discord: {exc}", file=sys.stderr)
